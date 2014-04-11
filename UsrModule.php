@@ -250,6 +250,10 @@ class UsrModule extends CWebModule
 		'profilePicture' => 'usr.controllers.DefaultController',
 		'password' => 'usr.controllers.DefaultController',
 	);
+    /**
+     * @var array List of disabled controllers, useful for backend/frontend setup
+     */
+    public $disabledControllers = array();
 
 	/**
 	 * @inheritdoc
@@ -293,6 +297,14 @@ class UsrModule extends CWebModule
             $this->_hybridauth = new Hybrid_Auth($hybridauthConfig);
         }
 	}
+
+    public function beforeControllerAction($controller, $action) {
+        if (in_array($controller->getId(), $this->disabledControllers)) {
+            Yii::app()->request->redirect('/');
+        }
+
+        return true;
+    }
 
 	public function setupMailer()
 	{
