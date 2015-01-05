@@ -12,6 +12,10 @@ $assignedRoles = $id === null ? array() : $authManager->getAuthItems(CAuthItem::
 if (is_array($assignedRoles) && count($assignedRoles) > 0) {
     $userRole = array_keys($assignedRoles);
     $userRole = $userRole[0];
+    $regularUser = new stdClass();
+    $regularUser->name = "";
+    $regularUser->description = "Normal user";
+    $allRoles[] = $regularUser;
 
 } else {
     $userRole = "";

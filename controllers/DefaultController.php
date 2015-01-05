@@ -280,7 +280,10 @@ class DefaultController extends UsrController
 						} else {
 							Yii::app()->user->setFlash('error', Yii::t('UsrModule.usr', 'Failed to send an email.').' '.Yii::t('UsrModule.usr', 'Try again or contact the site administrator.'));
 						}
-					}
+					} else {
+
+                        			$this->sendEmail($model, 'welcome', $passwordForm);
+                    			}
 					if ($model->getIdentity()->isActive()) {
 						if ($model->login()) {
 							$this->afterLogin();
@@ -313,6 +316,7 @@ class DefaultController extends UsrController
 
 		if (isset($_POST['ProfileForm']) && isset($_POST['ProfileForm']['password']))
 			$passwordForm->password = $_POST['ProfileForm']['password'];
+
 		if (isset($_POST['ajax']) && $_POST['ajax']==='profile-form') {
 			$models = array($model);
 			if (isset($_POST['PasswordForm']) && trim($_POST['PasswordForm']['newPassword']) !== '') {
@@ -330,6 +334,7 @@ class DefaultController extends UsrController
 			$passwordForm->setAttributes($_POST['PasswordForm']);
 			if ($passwordForm->validate()) {
 				if ($passwordForm->resetPassword($model->getIdentity())) {
+                    			$this->sendEmail($model, 'passwordChanged', $passwordForm);
 					$flashes['success'][] = Yii::t('UsrModule.usr', 'Changes have been saved successfully.');
 				} else {
 					$flashes['error'][] = Yii::t('UsrModule.usr', 'Failed to change password.');

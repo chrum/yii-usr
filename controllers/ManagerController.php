@@ -22,7 +22,7 @@ class ManagerController extends UsrController
 	{
 		return array(
 			'accessControl',
-			'postOnly + delete',
+			//'postOnly + delete,verify,activate,disable',
 		);
 	}
 
@@ -108,10 +108,13 @@ class ManagerController extends UsrController
 						$authManager = Yii::app()->authManager;
 						$assignedRoles = $id === null ? array() : $authManager->getAuthItems(CAuthItem::TYPE_ROLE, $id);
 
+						if (isset($_POST['roles']) && $_POST['roles'] == "") {
+						    unset($_POST['roles']);
+						}
 						if (isset($_POST['roles'])) {
-                            if (!is_array($_POST['roles'])) {
-                                $_POST['roles'] = array($_POST['roles']);
-                            }
+					    if (!is_array($_POST['roles'])) {
+					        $_POST['roles'] = array($_POST['roles']);
+					    }
 							foreach($_POST['roles'] as $roleName) {
 								if (!isset($assignedRoles[$roleName])) {
 									$authManager->assign($roleName, $identity->getId());
