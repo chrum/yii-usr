@@ -32,8 +32,11 @@ if ($id !== null) {
 
 ?>
 
-<h1><?php echo $this->pageTitle; ?>
-    <a class="btn btn-danger btn-xs delete" href="/usr/manager/delete/id/<?php echo $identity->id?>">Delete</a>
+<h1>
+    <?php echo $this->pageTitle; ?>
+    <?php if ($identity->id):?>
+        <a class="btn btn-danger btn-xs delete" href="/usr/manager/delete/id/<?php echo $identity->id?>" onclick="return confirm('Are you sure?')">Delete</a>
+    <?php endif;?>
 </h1>
 
 <?php $this->widget('usr.components.UsrAlerts', array('cssClassPrefix'=>$this->module->alertCssClassPrefix)); ?>
@@ -120,7 +123,9 @@ if ($id !== null) {
 <?php endif; ?>
 
 	<div class="buttons">
-		<?php echo CHtml::submitButton($id === null ? Yii::t('UsrModule.manager', 'Create') : Yii::t('UsrModule.manager', 'Save'), array('class'=>$this->module->submitButtonCssClass."pull-right btn btn-primary")); ?>
+		<?php echo CHtml::submitButton($id === null ? Yii::t('UsrModule.manager', 'Create') : Yii::t('UsrModule.manager', 'Save'), array(
+            'class'=>$this->module->submitButtonCssClass."pull-right btn btn-primary",
+        )); ?>
 	</div>
 
 <?php $this->endWidget(); ?>

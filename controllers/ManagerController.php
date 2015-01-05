@@ -171,7 +171,7 @@ class ManagerController extends UsrController
 		$this->loadModel($id)->toggleStatus(IManagedIdentity::STATUS_EMAIL_VERIFIED);
 
 		if(!isset($_GET['ajax']))
-			$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('index'));
+			$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('update', "id" => $id));
 	}
 
 	/**
@@ -183,7 +183,7 @@ class ManagerController extends UsrController
 		$this->loadModel($id)->toggleStatus(IManagedIdentity::STATUS_IS_ACTIVE);
 
 		if(!isset($_GET['ajax']))
-			$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('index'));
+			$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('update', "id" => $id));
 	}
 
 	/**
@@ -195,7 +195,7 @@ class ManagerController extends UsrController
 		$this->loadModel($id)->toggleStatus(IManagedIdentity::STATUS_IS_DISABLED);
 
 		if(!isset($_GET['ajax']))
-			$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('index'));
+			$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('update', "id" => $id));
 	}
 
 	/**
