@@ -205,6 +205,7 @@ if (!defined('PASSWORD_DEFAULT')) {
             return false;
         }
         $ret = crypt($password, $hash);
+        Yii::log("$ret = crypt($password, $hash);");
         if (!is_string($ret) || strlen($ret) != strlen($hash) || strlen($ret) <= 13) {
             return false;
         }

@@ -19,33 +19,35 @@ $this->pageTitle = Yii::app()->name.' - '.$title;
 		'validateOnSubmit'=>true,
 	),
 	'focus'=>array($model,'username'),
+    'htmlOptions' => array('class' => "form")
 )); ?>
 
 	<p class="note"><?php echo Yii::t('UsrModule.usr', 'Fields marked with <span class="required">*</span> are required.'); ?></p>
 
 	<?php echo $form->errorSummary($model); ?>
+    <div class="<?php echo $model->hasErrors() ? "has-error" : "" ?>">
+        <div class="control-group form-group">
+            <?php echo $form->labelEx($model,'username'); ?>
+            <?php echo $form->textField($model,'username', array("class" => "form-control")); ?>
+            <?php echo $form->error($model,'username', array("class" => "label label-danger")); ?>
+        </div>
 
-	<div class="control-group">
-		<?php echo $form->labelEx($model,'username'); ?>
-		<?php echo $form->textField($model,'username'); ?>
-		<?php echo $form->error($model,'username'); ?>
-	</div>
-
-	<div class="control-group">
-		<?php echo $form->labelEx($model,'password'); ?>
-		<?php echo $form->passwordField($model,'password'); ?>
-		<?php echo $form->error($model,'password'); ?>
-	</div>
+        <div class="control-group form-group">
+            <?php echo $form->labelEx($model,'password'); ?>
+            <?php echo $form->passwordField($model,'password', array("class" => "form-control")); ?>
+            <?php echo $form->error($model,'password', array("class" => "label label-danger")); ?>
+        </div>
+    </div>
 
 <?php if ($this->module->rememberMeDuration > 0): ?>
-	<div class="rememberMe control-group">
+	<div class="rememberMe control-group checkbox">
 		<?php echo $form->label($model,'rememberMe', array('label'=>$form->checkBox($model,'rememberMe').$model->getAttributeLabel('rememberMe'), 'class'=>'checkbox')); ?>
 		<?php echo $form->error($model,'rememberMe'); ?>
 	</div>
 <?php endif; ?>
 
 	<div class="buttons">
-		<?php echo CHtml::submitButton(Yii::t('UsrModule.usr', 'Log in'), array('class'=>$this->module->submitButtonCssClass)); ?>
+		<?php echo CHtml::submitButton(Yii::t('UsrModule.usr', 'Log in'), array('class'=>$this->module->submitButtonCssClass." btn btn-primary")); ?>
 	</div>
 <?php if ($this->module->recoveryEnabled): ?>
 	<p>

@@ -91,7 +91,7 @@ class UsrModule extends CWebModule
 	/**
 	 * @var boolean Is new user registration enabled.
 	 */
-	public $registrationEnabled = true;
+	public $registrationEnabled = false;
 	/**
 	 * @var boolean Does every new user needs to verify supplied email.
 	 */
@@ -280,6 +280,7 @@ class UsrModule extends CWebModule
 				'pathLayouts' => 'usr.views.layouts',
 			),
 		), false);
+
 		if (is_array($this->htmlCss)) {
 			foreach($this->htmlCss as $name=>$value) {
 				CHtml::$$name = $value;
@@ -322,6 +323,14 @@ class UsrModule extends CWebModule
 				$this->mailer->$key = $value;
 			}
 		}
+        $emailParams = Yii::app()->params['YiiMailer'];
+        foreach($emailParams as $key=>$value) {
+            if (is_array($value)) {
+                call_user_func_array(array($this->mailer, $key), $value);
+            } else {
+                $this->mailer->$key = $value;
+            }
+        }
 	}
 
 	/**

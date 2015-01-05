@@ -6,6 +6,7 @@
  */
 class SearchForm extends CFormModel
 {
+	public $excludedIds;
 	public $id;
 	public $username;
 	public $email;

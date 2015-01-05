@@ -39,9 +39,9 @@ class LoginForm extends BasePasswordForm
 	public function attributeLabels()
 	{
 		return array_merge($this->getBehaviorLabels(), parent::attributeLabels(), array(
-			'username'		=> Yii::t('UsrModule.usr','Username'),
+			'username'		=> Yii::t('UsrModule.usr',APP_CONFIG_NAME=='backend'?'Username':'E-mail address'),
 			'password'		=> Yii::t('UsrModule.usr','Password'),
-			'rememberMe'	=> Yii::t('UsrModule.usr','Remember me when logging in next time'),
+			'rememberMe'	=> Yii::t('UsrModule.usr','Remember me'),
 		));
 	}
 
@@ -51,6 +51,7 @@ class LoginForm extends BasePasswordForm
 	public function getIdentity()
 	{
 		if($this->_identity===null) {
+            /** @var UserIdentity $userIdentityClass */
 			$userIdentityClass = $this->userIdentityClass;
 			$this->_identity=new $userIdentityClass($this->username,$this->password);
 			$this->_identity->authenticate();

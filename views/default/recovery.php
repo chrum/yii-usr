@@ -24,25 +24,28 @@ $this->pageTitle = Yii::app()->name.' - '.$title;
 	<p class="note"><?php echo Yii::t('UsrModule.usr', 'Fields marked with <span class="required">*</span> are required.'); ?></p>
 
 	<?php echo $form->errorSummary($model); ?>
-
 <?php if ($model->scenario === 'reset'): ?>
-	<?php echo $form->hiddenField($model,'username'); ?>
-	<?php echo $form->hiddenField($model,'email'); ?>
-	<?php echo $form->hiddenField($model,'activationKey'); ?>
+    <?php echo $form->hiddenField($model,'username'); ?>
+    <?php echo $form->hiddenField($model,'email'); ?>
+    <?php echo $form->hiddenField($model,'activationKey'); ?>
 
-<?php $this->renderPartial('_newpassword', array('form'=>$form, 'model'=>$model)); ?>
+    <?php $this->renderPartial('_newpassword', array('form'=>$form, 'model'=>$model)); ?>
 <?php else: ?>
-	<div class="control-group">
-		<?php echo $form->labelEx($model,'username'); ?>
-		<?php echo $form->textField($model,'username'); ?>
-		<?php echo $form->error($model,'username'); ?>
-	</div>
+    <div class="row">
+        <div class="control-group form-group">
+            <?php echo $form->labelEx($model,'username'); ?>
+            <?php echo $form->textField($model,'username', array("class" => "form-control")); ?>
+            <?php echo $form->error($model,'username'); ?>
+        </div>
+    </div>
 
-	<div class="control-group">
-		<?php echo $form->labelEx($model,'email'); ?>
-		<?php echo $form->textField($model,'email'); ?>
-		<?php echo $form->error($model,'email'); ?>
-	</div>
+    <div class="row">
+        <div class="control-group form-group">
+            <?php echo $form->labelEx($model,'email'); ?>
+            <?php echo $form->textField($model,'email', array("class" => "form-control")); ?>
+            <?php echo $form->error($model,'email'); ?>
+        </div>
+    </div>
 
 <?php if($model->asa('captcha') !== null): ?>
 <?php $this->renderPartial('_captcha', array('form'=>$form, 'model'=>$model)); ?>
@@ -50,7 +53,7 @@ $this->pageTitle = Yii::app()->name.' - '.$title;
 <?php endif; ?>
 
 	<div class="buttons">
-		<?php echo CHtml::submitButton(Yii::t('UsrModule.usr', 'Submit'), array('class'=>$this->module->submitButtonCssClass)); ?>
+		<?php echo CHtml::submitButton(Yii::t('UsrModule.usr', 'Submit'), array('class'=>$this->module->submitButtonCssClass." btn btn-primary")); ?>
 	</div>
 
 <?php $this->endWidget(); ?>

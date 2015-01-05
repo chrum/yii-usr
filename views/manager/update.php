@@ -6,8 +6,16 @@
 /* @var $authManager CAuthManager */
 $identity = $profileForm->getIdentity();
 $authManager = Yii::app()->authManager;
-$assignedRoles = $id === null ? array() : $authManager->getAuthItems(CAuthItem::TYPE_ROLE, $id);
 $allRoles = $authManager->getAuthItems(CAuthItem::TYPE_ROLE);
+
+$assignedRoles = $id === null ? array() : $authManager->getAuthItems(CAuthItem::TYPE_ROLE, $id);
+if (is_array($assignedRoles) && count($assignedRoles) > 0) {
+    $userRole = array_keys($assignedRoles);
+    $userRole = $userRole[0];
+
+} else {
+    $userRole = "";
+}
 
 $this->pageTitle = $id === null ? Yii::t('UsrModule.manager', 'Create user') : Yii::t('UsrModule.manager', 'Update user {id}', array('{id}' => $id));
 
@@ -20,7 +28,9 @@ if ($id !== null) {
 
 ?>
 
-<h1><?php echo $this->pageTitle; ?></h1>
+<h1><?php echo $this->pageTitle; ?>
+    <a class="btn btn-danger btn-xs delete" href="/usr/manager/delete/id/<?php echo $identity->id?>">Delete</a>
+</h1>
 
 <?php $this->widget('usr.components.UsrAlerts', array('cssClassPrefix'=>$this->module->alertCssClassPrefix)); ?>
 
@@ -94,14 +104,19 @@ if ($id !== null) {
 <?php $this->renderPartial('/default/_form', array('form'=>$form, 'model'=>$profileForm, 'passwordForm'=>$passwordForm)); ?>
 
 <?php if (Yii::app()->user->checkAccess('usr.update.auth') && !empty($allRoles)): ?>
-	<div class="control-group">
-		<?php echo CHtml::label(Yii::t('UsrModule.manager', 'Authorization roles'), 'roles'); ?>
-		<?php echo CHtml::checkBoxList('roles', array_keys($assignedRoles), CHtml::listData($allRoles, 'name', 'description'), array('template'=>'{beginLabel}{input}{labelTitle}{endLabel}')); ?>
+	<div class="control-group row">
+		<?php echo CHtml::label(Yii::t('UsrModule.manager', 'Authorization roles'), 'roles', array("class" => "col-md-12")); ?>
+		<?php echo CHtml::radioButtonList('roles', $userRole, CHtml::listData($allRoles, 'name', 'description'), array(
+            'template'  => '{beginLabel}{input}{labelTitle}{endLabel}',
+            "class" => "col-md-1",
+            'separator' => "",
+            'labelOptions' => array("class" => "col-md-12"),
+        )); ?>
 	</div>
 <?php endif; ?>
 
 	<div class="buttons">
-		<?php echo CHtml::submitButton($id === null ? Yii::t('UsrModule.manager', 'Create') : Yii::t('UsrModule.manager', 'Save'), array('class'=>$this->module->submitButtonCssClass)); ?>
+		<?php echo CHtml::submitButton($id === null ? Yii::t('UsrModule.manager', 'Create') : Yii::t('UsrModule.manager', 'Save'), array('class'=>$this->module->submitButtonCssClass."pull-right btn btn-primary")); ?>
 	</div>
 
 <?php $this->endWidget(); ?>

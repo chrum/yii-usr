@@ -8,7 +8,8 @@ class ManagerController extends UsrController
 	 * @var string the default layout for the views. Defaults to '//layouts/column2', meaning
 	 * using two-column layout. See 'protected/views/layouts/column2.php'.
 	 */
-	public $layout='//layouts/column2';
+	//public $layout='//layouts/column2';
+	public $layout='//layouts/main';
 	/**
 	 * @var array context menu items. This property will be assigned to {@link CMenu::items}.
 	 */
@@ -96,7 +97,10 @@ class ManagerController extends UsrController
 						$authManager = Yii::app()->authManager;
 						$assignedRoles = $id === null ? array() : $authManager->getAuthItems(CAuthItem::TYPE_ROLE, $id);
 
-						if (isset($_POST['roles']) && is_array($_POST['roles'])) {
+						if (isset($_POST['roles'])) {
+                            if (!is_array($_POST['roles'])) {
+                                $_POST['roles'] = array($_POST['roles']);
+                            }
 							foreach($_POST['roles'] as $roleName) {
 								if (!isset($assignedRoles[$roleName])) {
 									$authManager->assign($roleName, $identity->getId());
@@ -185,7 +189,57 @@ class ManagerController extends UsrController
 	 */
 	public function actionIndex()
 	{
-		$model = $this->module->createFormModel('SearchForm');
+        $availableUserTypes = array(
+            "all" => "All Users",
+            "admin" => "Administrators",
+            "manager" => "Managers",
+            "user" => "Regular users"
+        );
+		if (isset($_REQUEST['setUserType']) && isset($availableUserTypes[$_REQUEST['setUserType']])) {
+            $userType = $_SESSION['userType'] = $_REQUEST['setUserType'];
+
+        } else if (isset($_SESSION['userType'])) {
+            $userType = $_SESSION['userType'];
+
+        } else {
+            $userType = 'all';
+        }
+
+        if ($userType != "all") {
+            if ($userType == "user") {
+                $excludedIds = array();
+                $users = AuthAssignment::model()->findAllByAttributes(
+                    array(),
+                    "itemname IN ('admin', 'manager')"
+                );
+                if (count($users) > 0) {
+                    foreach($users as $usr) {
+                        $excludedIds[] = $usr->userid;
+                    }
+                }
+
+            } else {
+                $ids = array();
+                $users = AuthAssignment::model()->findAllByAttributes(array(
+                    "itemname" => $userType
+                ));
+                if (count($users) > 0) {
+                    foreach($users as $usr) {
+                        $ids[] = $usr->userid;
+                    }
+                }
+            }
+
+        }
+
+        $model = $this->module->createFormModel('SearchForm');
+        if (isset($ids)) {
+            $model->id = $ids;
+        }
+        if (isset($excludedIds)) {
+            $model->excludedIds = $excludedIds;
+        }
+
 		if (isset($_GET['SearchForm'])) {
 			$model->attributes = $_GET['SearchForm'];
 			$model->validate();
@@ -193,7 +247,11 @@ class ManagerController extends UsrController
 			$model->unsetAttributes(array_keys($errors));
 		}
 
-		$this->render('index', array('model'=>$model));
+		$this->render('index', array(
+            'model'=>$model,
+            'userType' => $userType,
+            'availableUserTypes' => $availableUserTypes
+        ));
 	}
 
 	/**

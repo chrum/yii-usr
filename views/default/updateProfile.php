@@ -36,7 +36,7 @@ $this->pageTitle = Yii::app()->name.' - '.$title;
 <?php endif; ?>
 
 	<div class="buttons">
-		<?php echo CHtml::submitButton(Yii::t('UsrModule.usr', 'Submit'), array('class'=>$this->module->submitButtonCssClass)); ?>
+		<?php echo CHtml::submitButton(Yii::t('UsrModule.usr', 'Submit'), array('class'=>$this->module->submitButtonCssClass." btn btn-primary")); ?>
 	</div>
 
 <?php $this->endWidget(); ?>
