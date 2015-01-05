@@ -2,7 +2,8 @@
 
 class UsrCommand extends CConsoleCommand
 {
-	public function actionPassword($count = 1, $length = null, $extra_digit = null, $extra_char = null) {
+    public function actionPassword($count = 1, $length = null, $extra_digit = null, $extra_char = null)
+    {
 		$usrModule = Yii::app()->getModule('usr');
 		if ($length === null)
 			$length = $usrModule->dicewareLength;
@@ -28,7 +29,8 @@ class UsrCommand extends CConsoleCommand
      *   |   \-usr.update.password
      *   \-usr.delete
      */
-    public function getTemplateAuthItems() {
+    public function getTemplateAuthItems()
+    {
         return array(
             array('name'=> 'usr.manage',           'child' => null, 'type'=>CAuthItem::TYPE_TASK),
             array('name'=> 'usr.create',           'child' => 'usr.manage'),
@@ -88,5 +90,63 @@ class UsrCommand extends CConsoleCommand
         foreach($this->getTemplateAuthItems() as $template) {
             $auth->removeAuthItem($template['name']);
         }
+    }
+
+    /**
+     * Creating users using this command DOES NOT send the activation email.
+     * @param string $profile a POST (username=XX&password=YY) or JSON object with the profile form, can contain the password field
+     * @param string $authItems a comma separated list of auth items to assign
+     * @param boolean $generatePassword if true, a random password will be generated even if profile contains one
+     */
+    public function actionRegister($profile, $authItems = null, $generatePassword = false, $unlock = false)
+    {
+        $module = Yii::app()->getModule('usr');
+		/** @var ProfileForm */
+		$model = $module->createFormModel('ProfileForm', 'register');
+		/** @var PasswordForm */
+		$passwordForm = $module->createFormModel('PasswordForm', 'register');
+
+        if (($profileData = json_decode($profile)) === null) {
+            parse_str($profile, $profileData);
+        }
+        $model->setAttributes($profileData);
+        if (isset($profile['password'])) {
+            $passwordForm->setAttributes(array('newPassword' => $profile['password'], 'newVerify' => $profile['password']));
+        }
+        if ($generatePassword) {
+            require dirname(__FILE__) . '/../extensions/diceware/Diceware.php';
+            $diceware = new \nineinchnick\diceware\Diceware(Yii::app()->language);
+            $password = $diceware->get_phrase($module->dicewareLength, $module->dicewareExtraDigit, $module->dicewareExtraChar);
+            $passwordForm->setAttributes(array('newPassword' => $password, 'newVerify' => $password));
+        }
+
+        if ($model->validate() && $passwordForm->validate()) {
+            $trx = Yii::app()->db->beginTransaction();
+            if (!$model->save() || !$passwordForm->resetPassword($model->getIdentity())) {
+                $trx->rollback();
+                echo Yii::t('UsrModule.usr', 'Failed to register a new user.')."\n";
+                return false;
+            } else {
+                $trx->commit();
+                echo $model->username.' '.$passwordForm->newPassword."\n";
+                $identity = $model->getIdentity();
+                if ($authItems !== null) {
+                    $authItems = array_map('trim', explode(',', trim($authItems," \t\n\r\b\x0B,")));
+                    $authManager = Yii::app()->authManager;
+                    foreach($authItems as $authItemName) {
+                        $authManager->assign($authItemName, $identity->getId());
+                    }
+                }
+                if ($unlock) {
+                    if (!$identity->isActive())
+                        $identity->toggleStatus($identity::STATUS_IS_ACTIVE);
+                    if ($identity->isDisabled())
+                        $identity->toggleStatus($identity::STATUS_IS_DISABLED);
+                }
+                return true;
+            }
+        }
+        echo "Invalid data: ".print_r($model->getErrors(), true)."\n";
+        return false;
     }
 }

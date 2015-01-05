@@ -94,6 +94,7 @@ class HybridauthController extends UsrController
                         Yii::app()->user->setFlash('error', Yii::t('UsrModule.usr', 'Failed to associate current user with {provider}.', array('{provider}'=>$remoteLogin->provider)));
                         $this->redirect(array('login', 'provider'=>$remoteLogin->provider));
                     }
+                    $this->afterLogin();
                 }
                 if (!empty($this->module->associateByAttributes)) {
                     $userIdentityClass = $localProfile->userIdentityClass;
@@ -135,8 +136,13 @@ class HybridauthController extends UsrController
      * This action actually removes association with a remote profile instead of logging out.
      * @param string $provider name of the remote provider
      */
-    public function actionLogout($provider=null)
+    public function actionLogout($provider=null, $returnUrl=null)
     {
+		/** @var ProfileForm */
+		$model = $this->module->createFormModel('ProfileForm');
+        // HybridauthForm creates an association using lowercase provider
+        $model->getIdentity()->removeRemoteIdentity(strtolower($provider));
+		$this->redirect($returnUrl !== null ? $returnUrl : Yii::app()->homeUrl);
     }
 
     /**
@@ -194,7 +200,7 @@ class HybridauthController extends UsrController
         }
 
         $trx = Yii::app()->db->beginTransaction();
-        if (!$localProfile->save()) {
+        if (!$localProfile->save($this->module->requireVerifiedEmail)) {
             $trx->rollback();
             Yii::app()->user->setFlash('error', Yii::t('UsrModule.usr', 'Failed to register a new user.').' '.Yii::t('UsrModule.usr', 'Try again or contact the site administrator.'));
             return $localProfile;

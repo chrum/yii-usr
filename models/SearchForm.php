@@ -19,6 +19,8 @@ class SearchForm extends CFormModel
 	public $isActive;
 	public $isDisabled;
 
+	public $anyText;
+
 	/**
 	 * @var IdentityInterface cached object returned by @see getIdentity()
 	 */
@@ -39,8 +41,8 @@ class SearchForm extends CFormModel
 	public function rules()
 	{
 		return array(
-			array('id, username, email, firstName, lastName, createdOn, updatedOn, lastVisitOn, emailVerified, isActive, isDisabled', 'filter', 'filter'=>'trim'),
-			array('id, username, email, firstName, lastName, createdOn, updatedOn, lastVisitOn, emailVerified, isActive, isDisabled', 'default'),
+			array('id, username, email, firstName, lastName, createdOn, updatedOn, lastVisitOn, emailVerified, isActive, isDisabled, anyText', 'filter', 'filter'=>'trim'),
+			array('id, username, email, firstName, lastName, createdOn, updatedOn, lastVisitOn, emailVerified, isActive, isDisabled, anyText', 'default'),
 			array('id', 'numerical', 'integerOnly'=>true, 'max'=>0x7FFFFFFF, 'min'=>-0x8000000), // 32-bit integers
 			array('createdOn, updatedOn, lastVisitOn', 'date', 'format'=>array('yyyy-MM-dd', 'yyyy-MM-dd hh:mm', '?yyyy-MM-dd', '?yyyy-MM-dd hh:mm', '??yyyy-MM-dd', '??yyyy-MM-dd hh:mm')),
 			array('emailVerified, isActive, isDisabled', 'boolean'),
@@ -64,6 +66,7 @@ class SearchForm extends CFormModel
 			'emailVerified'	=> Yii::t('UsrModule.manager', 'Email Verified'),
 			'isActive'		=> Yii::t('UsrModule.manager', 'Is Active'),
 			'isDisabled'	=> Yii::t('UsrModule.manager', 'Is Disabled'),
+			'anyText'	    => Yii::t('UsrModule.manager', 'Search'),
 		);
 	}
 

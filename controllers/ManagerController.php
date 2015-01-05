@@ -22,7 +22,7 @@ class ManagerController extends UsrController
 	{
 		return array(
 			'accessControl',
-			//'postOnly + delete,verify,activate,disable',
+			'postOnly + delete',
 		);
 	}
 
@@ -35,12 +35,23 @@ class ManagerController extends UsrController
 	{
 		return array(
 			array('allow', 'actions'=>array('index'), 'roles'=>array('usr.read')),
-			array('allow', 'actions'=>array('update'), 'roles'=>array('usr.update')),
+			array('allow', 'actions'=>array('update'), 'users'=>array('@')),
 			array('allow', 'actions'=>array('delete'), 'roles'=>array('usr.delete')),
 			array('allow', 'actions'=>array('verify', 'activate', 'disable'), 'roles'=>array('usr.update.status')),
 			array('deny', 'users'=>array('*')),
 		);
 	}
+
+    /**
+     * @inheritdoc
+     */
+    protected function afterAction($action)
+    {
+        if (in_array($action->id, array('delete', 'verify', 'activate', 'disable'))) {
+            if(!isset($_GET['ajax']))
+                $this->redirect(isset($_REQUEST['returnUrl']) ? $_REQUEST['returnUrl'] : array('index'));
+        }
+    }
 
 	/**
 	 * Updates a particular model.
@@ -88,7 +99,7 @@ class ManagerController extends UsrController
 			if ($profileForm->validate() && (!$updatePassword || $passwordForm->validate())) {
 				$trx = Yii::app()->db->beginTransaction();
 				$oldEmail = $profileForm->getIdentity()->getEmail();
-				if (($canUpdateAttributes && !$profileForm->save()) || ($updatePassword && !$passwordForm->resetPassword($profileForm->getIdentity()))) {
+				if (($canUpdateAttributes && !$profileForm->save($this->module->requireVerifiedEmail)) || ($updatePassword && !$passwordForm->resetPassword($profileForm->getIdentity()))) {
 					$trx->rollback();
 					Yii::app()->user->setFlash('error', Yii::t('UsrModule.usr', 'Failed to register a new user.').' '.Yii::t('UsrModule.usr', 'Try again or contact the site administrator.'));
 				} else {
@@ -122,7 +133,7 @@ class ManagerController extends UsrController
 						}
 					}
 					if (!Yii::app()->user->hasFlash('success')) {
-						Yii::app()->user->setFlash('success', Yii::t('UsrModule.usr', 'User account has been successfully created or updated.'));
+						Yii::app()->user->setFlash('success', Yii::t('UsrModule.manager', 'User account has been successfully created or updated.'));
 					}
 					$this->redirect(array('index'));
 				}

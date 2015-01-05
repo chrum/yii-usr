@@ -269,7 +269,7 @@ class DefaultController extends UsrController
 				$passwordForm->setAttributes($_POST['PasswordForm']);
 			if ($model->validate() && $passwordForm->validate()) {
 				$trx = Yii::app()->db->beginTransaction();
-				if (!$model->save() || !$passwordForm->resetPassword($model->getIdentity())) {
+				if (!$model->save($this->module->requireVerifiedEmail) || !$passwordForm->resetPassword($model->getIdentity())) {
 					$trx->rollback();
 					Yii::app()->user->setFlash('error', Yii::t('UsrModule.usr', 'Failed to register a new user.').' '.Yii::t('UsrModule.usr', 'Try again or contact the site administrator.'));
 				} else {
@@ -280,10 +280,7 @@ class DefaultController extends UsrController
 						} else {
 							Yii::app()->user->setFlash('error', Yii::t('UsrModule.usr', 'Failed to send an email.').' '.Yii::t('UsrModule.usr', 'Try again or contact the site administrator.'));
 						}
-					} else {
-
-                        $this->sendEmail($model, 'welcome', $passwordForm);
-                    }
+					}
 					if ($model->getIdentity()->isActive()) {
 						if ($model->login()) {
 							$this->afterLogin();
@@ -316,7 +313,6 @@ class DefaultController extends UsrController
 
 		if (isset($_POST['ProfileForm']) && isset($_POST['ProfileForm']['password']))
 			$passwordForm->password = $_POST['ProfileForm']['password'];
-
 		if (isset($_POST['ajax']) && $_POST['ajax']==='profile-form') {
 			$models = array($model);
 			if (isset($_POST['PasswordForm']) && trim($_POST['PasswordForm']['newPassword']) !== '') {
@@ -334,7 +330,6 @@ class DefaultController extends UsrController
 			$passwordForm->setAttributes($_POST['PasswordForm']);
 			if ($passwordForm->validate()) {
 				if ($passwordForm->resetPassword($model->getIdentity())) {
-                    			$this->sendEmail($model, 'passwordChanged', $passwordForm);
 					$flashes['success'][] = Yii::t('UsrModule.usr', 'Changes have been saved successfully.');
 				} else {
 					$flashes['error'][] = Yii::t('UsrModule.usr', 'Failed to change password.');
@@ -348,7 +343,7 @@ class DefaultController extends UsrController
 			}
 			if ($model->validate()) {
 				$oldEmail = $model->getIdentity()->getEmail();
-				if ($model->save()) {
+				if ($model->save($this->module->requireVerifiedEmail)) {
 					if ($this->module->requireVerifiedEmail && $oldEmail != $model->email) {
 						if ($this->sendEmail($model, 'verify')) {
 							$flashes['success'][] = Yii::t('UsrModule.usr', 'An email containing further instructions has been sent to the provided email address.');
@@ -371,7 +366,6 @@ class DefaultController extends UsrController
 			Yii::app()->user->setFlash('success', implode('<br/>',$flashes['success']));
 		if (!empty($flashes['error']))
 			Yii::app()->user->setFlash('error', implode('<br/>',$flashes['error']));
-
 		if ($update) {
 			$this->render('updateProfile',array('model'=>$model, 'passwordForm'=>$passwordForm));
 		} else {
