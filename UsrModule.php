@@ -269,6 +269,7 @@ class UsrModule extends CWebModule
 	public function init()
 	{
 		parent::init();
+
 		$this->setImport(array(
 			'usr.models.*',
 			'usr.components.*',

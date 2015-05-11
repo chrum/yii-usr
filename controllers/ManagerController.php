@@ -35,7 +35,7 @@ class ManagerController extends UsrController
 	{
 		return array(
 			array('allow', 'actions'=>array('index'), 'roles'=>array('usr.read')),
-			array('allow', 'actions'=>array('update'), 'users'=>array('@')),
+			array('allow', 'actions'=>array('update', 'bulkAdd'), 'users'=>array('@')),
 			array('allow', 'actions'=>array('delete'), 'roles'=>array('usr.delete')),
 			array('allow', 'actions'=>array('verify', 'activate', 'disable'), 'roles'=>array('usr.update.status')),
 			array('deny', 'users'=>array('*')),
@@ -282,4 +282,55 @@ class ManagerController extends UsrController
 			throw new CHttpException(404,'The requested page does not exist.');
 		return $model;
 	}
+
+    public function actionBulkAdd()
+    {
+        if (isset($_REQUEST['name']) && $_REQUEST['name'] != "" &&
+            isset($_REQUEST['password']) && $_REQUEST['password'] != "" &&
+            isset($_REQUEST['amount']))
+        {
+            $name = $_REQUEST['name'];
+            $password = $_REQUEST['password'];
+            $appendId = isset($_REQUEST['password_with_id']) ? true : false;
+            $amount = intval($_REQUEST['amount']);
+            if($amount == 0) {
+                $amount = 1;
+            }
+
+            /*
+            $q = new CDbCriteria();
+            $q->addSearchCondition('username', $name);
+            $existing = User::model()->findAll($q);
+            */
+
+            $data = array();
+            for($i = 1; $i <= $amount; $i++) {
+                $user = new stdClass();
+                $user->username = $name.$i;
+                $user->password = $password.($appendId ? $i : "");
+                $user->email = $name.$i."@test.te";
+                if (isset($_REQUEST["create"])) {
+                    $newUser = new User();
+                    $newUser->setAttributes((array)$user);
+                    $newUser->password = User::hashPassword($user->password);
+                    $newUser->firstname = $user->username;
+                    $newUser->is_active = 1;
+                    $newUser->save();
+
+                } else {
+                    $user->id = $i;
+                    $data[] = $user;
+                }
+            }
+        }
+
+
+        $this->render('bulkAdd', array(
+            'name' => isset($name) ? $name : '',
+            'password' => isset($password) ? $password : '',
+            'appendId' => isset($appendId) ? $appendId : false,
+            'amount' => isset($amount) ? $amount : 1,
+            'data' => isset($data) ? $data : false
+        ));
+    }
 }
