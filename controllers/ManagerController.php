@@ -297,13 +297,8 @@ class ManagerController extends UsrController
                 $amount = 1;
             }
 
-            /*
-            $q = new CDbCriteria();
-            $q->addSearchCondition('username', $name);
-            $existing = User::model()->findAll($q);
-            */
-
             $data = array();
+            $added = 0;
             for($i = 1; $i <= $amount; $i++) {
                 $user = new stdClass();
                 $user->username = $name.$i;
@@ -315,11 +310,46 @@ class ManagerController extends UsrController
                     $newUser->password = User::hashPassword($user->password);
                     $newUser->firstname = $user->username;
                     $newUser->is_active = 1;
-                    $newUser->save();
+                    if ($newUser->validate()) {
+                        //$newUser->save(false);
+                        $added++;
+                    }
 
                 } else {
                     $user->id = $i;
                     $data[] = $user;
+                }
+            }
+
+            if (isset($_REQUEST["create"])) {
+                if ($added == $amount) {
+                    Yii::app()->user->setFlash('success', "Successfully added $added new user(s).");
+
+                } else if ($added > 0){
+                    Yii::app()->user->setFlash('warning', "Successfully added $added from $amount new user(s).");
+
+                } else {
+                    Yii::app()->user->setFlash('error', "Successfully added $added new user(s).");
+                }
+                unset($name, $password, $appendId, $amount);
+
+            } else {
+                $q = new CDbCriteria();
+                $q->addSearchCondition('username', $name);
+                $existing = User::model()->findAll($q);
+                $existingUsernames = array();
+                $existingEmails = array();
+                foreach($existing as $user) {
+                    $existingUsernames[] = $user->username;
+                    $existingEmails[] = $user->email;
+                }
+                for($i = 0; $i < count($data); $i++) {
+                    if (in_array($data[$i]->username, $existingUsernames)) {
+                        $data[$i]->error = "Username exists, cant create this user";
+
+                    } else if (in_array($data[$i]->email, $existingEmails)) {
+
+                    }
                 }
             }
         }

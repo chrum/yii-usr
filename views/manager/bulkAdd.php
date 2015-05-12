@@ -7,8 +7,9 @@
  */
 
 $this->pageTitle = Yii::t('UsrModule.manager', 'Bulk add');
-$pageSize = 10;
+$pageSize = 100;
 ?>
+<?php $this->widget('usr.components.UsrAlerts', array('cssClassPrefix'=>$this->module->alertCssClassPrefix)); ?>
 <h1>
     <?php echo $this->pageTitle; ?>
 </h1>
@@ -40,7 +41,7 @@ $pageSize = 10;
             'id'=>'newUsers',
             'sort'=>array(
                 'attributes'=>array(
-                    'id', 'username', 'email', 'password'
+                    'id', 'username', 'email', 'password', 'error'
                 ),
             ),
             'pagination'=>array(
@@ -51,6 +52,7 @@ $pageSize = 10;
         <?php $this->widget('bootstrap.widgets.TbGridView', array(
                 'dataProvider' => $dataProvider,
                 'template' => "{items}",
+                'enableSorting' => false,
                 'columns' => array(
                     array(
                         'name' => 'id',
@@ -68,6 +70,10 @@ $pageSize = 10;
                     array(
                         'name' => 'password',
                         'header' => 'Password',
+                    ),
+                    array(
+                        'name' => 'error',
+                        'header' => 'Errors',
                     ),
                 ),
             )); ?>
