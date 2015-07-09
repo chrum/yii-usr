@@ -153,7 +153,12 @@ class DefaultController extends UsrController
 				} else {
 					Yii::app()->user->setFlash('error', Yii::t('UsrModule.usr', 'Failed to change password or log in using new password.'));
 				}
-			}
+			} else {
+                $errors = $model->getErrors();
+                array_map(function($error){
+                    Yii::app()->user->setFlash('error', Yii::t('UsrModule.usr', $error[0]));
+                }, $errors);
+            }
 		}
 		switch($model->scenario) {
 		default: $view = 'login'; break;
@@ -281,9 +286,8 @@ class DefaultController extends UsrController
 							Yii::app()->user->setFlash('error', Yii::t('UsrModule.usr', 'Failed to send an email.').' '.Yii::t('UsrModule.usr', 'Try again or contact the site administrator.'));
 						}
 					} else {
-
-                        			$this->sendEmail($model, 'welcome', $passwordForm);
-                    			}
+                        $this->sendEmail($model, 'welcome', $passwordForm);
+                    }
 					if ($model->getIdentity()->isActive()) {
 						if ($model->login()) {
 							$this->afterLogin();
@@ -334,7 +338,7 @@ class DefaultController extends UsrController
 			$passwordForm->setAttributes($_POST['PasswordForm']);
 			if ($passwordForm->validate()) {
 				if ($passwordForm->resetPassword($model->getIdentity())) {
-                    			$this->sendEmail($model, 'passwordChanged', $passwordForm);
+                    $this->sendEmail($model, 'passwordChanged', $passwordForm);
 					$flashes['success'][] = Yii::t('UsrModule.usr', 'Changes have been saved successfully.');
 				} else {
 					$flashes['error'][] = Yii::t('UsrModule.usr', 'Failed to change password.');
@@ -367,6 +371,7 @@ class DefaultController extends UsrController
 				}
 			}
 		}
+
 		if (!empty($flashes['success']))
 			Yii::app()->user->setFlash('success', implode('<br/>',$flashes['success']));
 		if (!empty($flashes['error']))

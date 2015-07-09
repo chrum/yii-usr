@@ -255,6 +255,11 @@ class UsrModule extends CWebModule
      */
     public $disabledControllers = array();
 
+    /**
+     * @var bool
+     */
+    public $passwordRequiredForEmailChange = true;
+
 	/**
 	 * @inheritdoc
 	 */

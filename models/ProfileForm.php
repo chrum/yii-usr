@@ -52,16 +52,22 @@ class ProfileForm extends BaseUsrForm
 	 */
 	public function rules()
 	{
-		return array_merge($this->getBehaviorRules(), array(
-			array('username, email, firstName, lastName, removePicture', 'filter', 'filter'=>'trim'),
-			array('username, email, firstName, lastName, removePicture', 'default', 'setOnEmpty'=>true, 'value' => null),
+        $rules = array(
+            array('username, email, firstName, lastName, removePicture', 'filter', 'filter'=>'trim'),
+            array('username, email, firstName, lastName, removePicture', 'default', 'setOnEmpty'=>true, 'value' => null),
 
-			array('username, email', 'required'),
-			array('username, email', 'uniqueIdentity'),
-			array('email', 'email'),
-			array('removePicture', 'boolean'),
-			array('password', 'validCurrentPassword', 'except'=>'register'),
-		), $this->pictureUploadRules);
+            array('username, email', 'required'),
+            array('username, email', 'uniqueIdentity'),
+            array('email', 'email'),
+            array('removePicture', 'boolean'),
+
+        );
+
+        if (Yii::app()->getModule('usr')->passwordRequiredForEmailChange) {
+            $rules[] = array('password', 'validCurrentPassword', 'except'=>'register');
+        }
+
+		return array_merge($this->getBehaviorRules(), $rules, $this->pictureUploadRules);
 	}
 
 	/**
